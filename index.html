@@ -1,0 +1,152 @@
+<html>
+<head>
+<title>GLQuery</title>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/Three.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Color.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Vector2.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Vector3.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Vector4.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Ray.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Rectangle.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Matrix3.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Matrix4.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Vertex.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Face3.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Face4.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/UV.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/core/Geometry.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/cameras/Camera.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/lights/Light.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/lights/AmbientLight.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/lights/DirectionalLight.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/lights/PointLight.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/objects/Object3D.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/objects/Particle.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/objects/Line.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/objects/Mesh.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/Material.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/LineBasicMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshBasicMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshLambertMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshPhongMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshDepthMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshNormalMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshFaceMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/MeshShaderMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/ParticleBasicMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/ParticleCircleMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/ParticleDOMMaterial.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/Texture.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/CubeReflectionMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/CubeRefractionMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/LatitudeReflectionMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/LatitudeRefractionMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/SphericalReflectionMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/SphericalRefractionMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/materials/mappings/UVMapping.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/scenes/Scene.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/scenes/Fog.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/Projector.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/DOMRenderer.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/CanvasRenderer.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/SVGRenderer.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/WebGLRenderer.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/WebGLRenderer2.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/renderables/RenderableObject.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/renderables/RenderableFace3.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/renderables/RenderableParticle.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/renderers/renderables/RenderableLine.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/extras/primitives/Plane.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/extras/primitives/Sphere.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/extras/primitives/Cube.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/extras/ImageUtils.js"></script>
+<script type="text/javascript" src="/mrdoob-three.js-5135631/src/extras/ShaderUtils.js"></script>
+
+<script type="text/javascript" src="/GLQuery/Stats.js"></script>
+<script type="text/javascript" src="/GLQuery/Tween.js"></script>
+
+
+<script type="text/javascript" src="/GLQuery/Obj.js"></script>
+<script type="text/javascript" src="/GLQuery/jquery-1.5.min.js"></script>
+<script type="text/javascript" src="/GLQuery/GLQuery.js"></script>
+<script type="text/javascript" src="/GLQuery/GLQuery.filereader.js"></script>
+<script type="text/javascript" src="/GLQuery/GLQuery.selector.js"></script>
+
+</head>
+<body>
+
+<pre id="log"></pre>
+
+<div id="info">Drag and drop .OBJ files on the surface below.</div>
+
+
+<div id='d_container'></div>
+
+
+<script type="text/javascript">
+
+
+$( document ).ready( function()
+{
+
+GLQuery.init( window.innerWidth * 1.0, window.innerHeight * 1.0, 'd_container', 1 );
+
+GLQuery.fnc_create_sky( 10000 );
+
+GLQuery.fnc_add_earth( 'earth' ).addClass( 'selectable' );
+
+GLQuery.loadDynamic( '/models/skele.obj', '/textures/metal.jpg', 'sele', 'selectable',
+function()
+{
+        $3( this ).scale( 10 );
+} );
+
+
+$3('.selectable')
+//      .mouseover( function() { $3( this ).select(); } )
+//      .mouseout( function() { $3( this ).unselect(); } )
+//      .click( function() { alert('click'); } )
+//      .wheel( function() { alert('mwheel'); } )
+
+        .bind( 'Alt+Click', function( e ) { $3( this ).select(); } )
+        .bind( 'Shift+Click', function( e ) { $3( this ).unselect(); } )
+
+        .bind( 'Alt+WheelUp', function( e ) { $3( this ).advance( '#target', 100, 1000 ); } )
+        .bind( 'Alt+WheelDown', function( e ) { $3( this ).advance( '#target', -100, 1000 ); } )
+
+        .bind( 'Alt+Shift+WheelUp', function( e ) { $3( this ).rotate( -Math.PI / 16 ); } )
+        .bind( 'Alt+Shift+WheelDown', function( e ) { $3( this ).rotate( Math.PI / 16 ); } )
+
+        .bind( 'Shift+WheelUp', function( e ) { $3( this ).scale( 1.1 ); } )
+        .bind( 'Shift+WheelDown', function( e ) { $3( this ).scale( 0.9 ); } )
+;
+
+
+GLQuery.keydown( Key.w, function() { GLQuery.fnc_camera_advance( -GLQuery.float_moving_speed * 1 ) } )
+.keydown( Key.s, function() { GLQuery.fnc_camera_advance( GLQuery.float_moving_speed * 1 ) } )
+.keydown( Key.a, function() { GLQuery.fnc_camera_sidestep( -GLQuery.float_moving_speed ) } )
+.keydown( Key.d, function() { GLQuery.fnc_camera_sidestep( GLQuery.float_moving_speed ) } )
+.keydown( Key.q, function() { GLQuery.fnc_camera_rotate_horiz( GLQuery.float_rotation_speed ) } )
+.keydown( Key.e, function() { GLQuery.fnc_camera_rotate_horiz( -GLQuery.float_rotation_speed ) } )
+.keydown( Key.pagedown, function() { GLQuery.fnc_camera_rotate_vert( GLQuery.float_rotation_speed ) } )
+.keydown( Key.pageup, function() { GLQuery.fnc_camera_rotate_vert( -GLQuery.float_rotation_speed ) } )
+.keydown( Key.space, function() { GLQuery.fnc_camera_rise( GLQuery.float_moving_speed ) } )
+.keydown( Key.ctrl, function() { GLQuery.fnc_camera_rise( -GLQuery.float_moving_speed ) } )
+//.keydown( Key.uparrow, function() { $3('.planet').advance( '#target', 100, 1000 ) } )
+//.keydown( Key.downarrow, function() { $3('.planet').advance( '#target', -100, 1000 ) } )
+.keydown( Key.leftarrow, function() { GLQuery.fnc_orbit_horiz( '#selected' ) } )
+.keydown( Key.rightarrow, function() { GLQuery.fnc_orbit_horiz( '#selected', -1 ) } )
+.keydown( Key.uparrow, function() { GLQuery.fnc_orbit_vert( '#selected', -1 ) } )
+.keydown( Key.downarrow, function() { GLQuery.fnc_orbit_vert( '#selected' ) } )
+.keydown( Key.end, function() { GLQuery.bool_mouselook = ! GLQuery.bool_mouselook } )
+
+jQuery( GLQuery.dom_element ).bind( 'contextmenu',
+function() { GLQuery.bool_mouselook = ! GLQuery.bool_mouselook; } );
+
+GLQuery.fnc_create_drop_point( GLQuery.dom_element );
+
+} );
+</script>
+
+</body>
+</html>
