@@ -1,60 +1,3 @@
-String.format = function()
-{
-	var str=arguments[0];
-	str = str.replace(/`/g,"\"");
-	var size = arguments.length;
-	for (var i = 0; i<size; i++)
-	{
-		var replaceThis = "\\{"+i+"\\}";
-		var withThis = arguments[i+1];
- 
-		var re = new RegExp( replaceThis, "g" );
-		str = str.replace(re , withThis );
-	}
-	return str;
-};
-Array.implode = function( delimit, array )
-{
-	return array.join( delimit );
-};
-String.explode = function( delimit, string )
-{
-	return string.split( delimit );
-};
-jQuery.json_decode = function ( string )
-{
-	return jQuery.parseJSON( string );
-};
-jQuery.json_encode = function ( array )
-{
-	return jQuery.encode( array );
-};
-String.prototype.startsWith = function( str ) 
-{
-	return ( this.match( new RegExp( '^' + str ) ) == str );
-}
-String.prototype.endsWith = function( str ) 
-{
-	return ( this.match( new RegExp( str + '$' ) ) == str );
-}
-String.prototype.contains = function( str ) 
-{
-	return this.indexOf( str ) != -1;
-}
-var echo = function( obj )
-{
-	try
-	{
-		console.log( obj );
-	}
-	catch( x )
-	{
-	}
-};
-Math.round_number = function( num, dec )
-{
-	return Math.round( num * Math.pow( 10, dec ) ) / Math.pow( 10, dec );
-}
 
 /**
 Constructor
@@ -115,13 +58,13 @@ Add & Select
 /**/
 GLQuery.arr_names = [];
 GLQuery.arr_objects = [];
-GLQuery.add = function( str, obj )
+GLQuery.add = function( str, mesh )
 {
-	var result = new GLQuery( str, obj );
+	var result = new GLQuery( str, mesh );
 	GLQuery.arr_names[ str ] = result;
-	obj.date = fnc_now();
+	mesh.date = time();
 	
-	GLQuery.arr_objects[ obj.date ] = result;
+	GLQuery.arr_objects[ mesh.date ] = result;
 	return result;
 }
 GLQuery.set = function( str, obj )
@@ -179,18 +122,18 @@ GLQuery.init = function( int_width, int_height, parent, count )
 	
 	for ( var i = 0; i < count; i++ )
 	{
-		GLQuery.fnc_init_renderer( int_width, int_height, dom_parent );
+		GLQuery.init_renderer( int_width, int_height, dom_parent );
 	}
 	
 	/** Init the event listeners */
-	GLQuery.fnc_init_event_listeners();
+	GLQuery.init_event_listeners();
 	
-	setInterval( GLQuery.fnc_main_loop, 1000 / 60 ); //16 fps
+	setInterval( GLQuery.main_loop, 1000 / 60 ); //16 fps
 	return this;
 }
 
 
-GLQuery.fnc_init_camera = function( int_width, int_height )
+GLQuery.init_camera = function( int_width, int_height )
 {
 	//( fov, aspect, near, far )
 	var camera = new THREE.Camera( 60, int_width / int_height, 10, 1000*100 );
@@ -202,7 +145,7 @@ GLQuery.fnc_init_camera = function( int_width, int_height )
 	return camera;
 }
 /** Init the canvas */
-GLQuery.fnc_init_stats = function()
+GLQuery.init_stats = function()
 {
 	GLQuery.stats = new Stats();
 	GLQuery.stats.domElement.style.position = 'absolute';
@@ -211,7 +154,7 @@ GLQuery.fnc_init_stats = function()
 	GLQuery.container.appendChild( GLQuery.stats.domElement );
 	GLQuery.arr_functions[ 'stats' ] = GLQuery.stats.update;
 }
-GLQuery.fnc_init_renderer = function( int_width, int_height, dom_parent )
+GLQuery.init_renderer = function( int_width, int_height, dom_parent )
 {
 	GLQuery.container = dom_parent;
 	
@@ -219,10 +162,10 @@ GLQuery.fnc_init_renderer = function( int_width, int_height, dom_parent )
 	//GLQuery.scene.fog = new THREE.Fog( 0xffffff, 1, 10000 );
 
 	/** If this is set to true, antialising is enabled */
-	var renderer = new THREE.WebGLRenderer2( false );
+	var renderer = new THREE.WebGLRenderer( false );
 	renderer.setSize( int_width, int_height  );
 	
-	var camera = GLQuery.fnc_init_camera( int_width, int_height );
+	var camera = GLQuery.init_camera( int_width, int_height );
 	GLQuery.renderers.push(
 	{
 		renderer : renderer
@@ -252,7 +195,7 @@ GLQuery.fnc_init_renderer = function( int_width, int_height, dom_parent )
 	
 	return this;
 }
-GLQuery.fnc_draw_minimap = function()
+GLQuery.draw_minimap = function()
 {
 	GLQuery.debugContext.clearRect( -256, -256, GLQuery.int_width, GLQuery.int_height );
  
@@ -287,7 +230,7 @@ GLQuery.fnc_draw_minimap = function()
 	
 	return this;
 }
-GLQuery.fnc_add_minimap = function()
+GLQuery.add_minimap = function()
 {
 	/**
 	Minimap
@@ -309,7 +252,7 @@ GLQuery.fnc_add_minimap = function()
 	
 	
 	
-	GLQuery.arr_functions[ 'minimap' ] = GLQuery.fnc_draw_minimap;
+	GLQuery.arr_functions[ 'minimap' ] = GLQuery.draw_minimap;
 	return this;
 }
 /** Generate a texture */
@@ -343,8 +286,10 @@ GLQuery.generateTexture = function( r, g, b )
 	return canvas;
 
 }
-GLQuery.fnc_load_texture = function( path )
+GLQuery.load_texture = function( path )
 {
+	return new THREE.MeshBasicMaterial( { map : ImageUtils.loadTexture( path ) } );
+	
 	var image = new Image();
 	var material = new THREE.MeshBasicMaterial( { map : new THREE.Texture( image ) } );
 	with ( { material : material } )
@@ -359,17 +304,17 @@ GLQuery.fnc_load_texture = function( path )
 
 	return material;
 }
-GLQuery.fnc_get_material_wireframe = function()
+GLQuery.get_material_wireframe = function()
 {
 	//Transparent with wireframe
 	return [ new THREE.MeshBasicMaterial( { color: 0.2 * 0xffffff, opacity: 0.5 } ), new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, wireframe: true } ) ];
 }
-GLQuery.fnc_get_special_material = function( str_path )
+GLQuery.get_special_material = function( str_path )
 {
 	var texture2 = new THREE.Texture( GLQuery.generateTexture( 1, 1, 1 ), new THREE.SphericalReflectionMapping() );
 	return new THREE.MeshBasicMaterial( { map: texture2, env_map: ImageUtils.loadTexture( str_path, new THREE.UVMapping() ) } );
 };
-GLQuery.fnc_get_random_material = function( index )
+GLQuery.get_random_material = function( index )
 {
 	var uniforms = ShaderUtils.lib[ 'basic' ].uniforms;
 	var vertex_shader = ShaderUtils.lib[ 'basic' ].vertex_shader;
@@ -382,7 +327,7 @@ GLQuery.fnc_get_random_material = function( index )
 	//Many colors 
 	materials.push( new THREE.MeshNormalMaterial() );
 	//Cool reflections
-	materials.push( new THREE.MeshBasicMaterial( { map: texture2, env_map: ImageUtils.loadTexture( '/textures/envmap.png', new THREE.UVMapping() ) } ) );
+	materials.push( new THREE.MeshBasicMaterial( { map: texture2, env_map: ImageUtils.loadTexture( 'textures/envmap.png', new THREE.UVMapping() ) } ) );
 	
 	
 	//Solid color
@@ -390,16 +335,16 @@ GLQuery.fnc_get_random_material = function( index )
 	//Looks black
 	//materials.push( new THREE.MeshBasicMaterial( { map: texture, fog: true } ) );
 	//First black then dissapears
-	//materials.push( new THREE.MeshBasicMaterial( { map: ImageUtils.loadTexture( '/textures/land_ocean_ice_cloud_2048.jpg' ) } ) );
+	//materials.push( new THREE.MeshBasicMaterial( { map: ImageUtils.loadTexture( 'textures/land_ocean_ice_cloud_2048.jpg' ) } ) );
 	
 
 	/*
-	loadTexture( '/textures/cube/skybox/px.jpg' ), // right
-					loadTexture( '/textures/cube/skybox/nx.jpg' ), // left
-					loadTexture( '/textures/cube/skybox/py.jpg' ), // top
-					loadTexture( '/textures/cube/skybox/ny.jpg' ), // bottom
-					loadTexture( '/textures/cube/skybox/pz.jpg' ), // back
-					loadTexture( '/textures/cube/skybox/nz.jpg' ) // front
+	loadTexture( 'textures/cube/skybox/px.jpg' ), // right
+					loadTexture( 'textures/cube/skybox/nx.jpg' ), // left
+					loadTexture( 'textures/cube/skybox/py.jpg' ), // top
+					loadTexture( 'textures/cube/skybox/ny.jpg' ), // bottom
+					loadTexture( 'textures/cube/skybox/pz.jpg' ), // back
+					loadTexture( 'textures/cube/skybox/nz.jpg' ) // front
  
  */
 
@@ -413,7 +358,7 @@ GLQuery.fnc_get_random_material = function( index )
 	return materials[ index ];
 }
 
-GLQuery.fnc_add_object_from_str = function( str )
+GLQuery.add_object_from_str = function( str )
 {
 	var int_area = 1;
 	var int_offset =  GLQuery.arr_objects.length;
@@ -426,18 +371,21 @@ GLQuery.fnc_add_object_from_str = function( str )
 		}
 		obj_rotation = { x:0, y:0, z:0 };
 		int_scale = ( i + 1 ) * int_area;
-		GLQuery.fnc_add_object( new Obj_from_str( str ), GLQuery.fnc_get_random_material(), obj_position, obj_rotation, int_scale, true );
+		
+		var material = GLQuery.load_texture('textures/land_ocean_ice_cloud_2048.jpg' );
+		//material = GLQuery.get_random_material(); 
+		
+		return GLQuery.add_object( new Obj_from_str( str ), material, obj_position, obj_rotation, int_scale, true );
 	}
-	return this;
 }
-GLQuery.fnc_add_object_wireframe = function( geom, obj_position, obj_rotation, obj_scale )
+GLQuery.add_object_wireframe = function( geom, obj_position, obj_rotation, obj_scale )
 {
 	var int_area = 1;
 
-	return GLQuery.fnc_add_object( new Obj_from_geom( geom ), GLQuery.fnc_get_material_wireframe(), obj_position, obj_rotation, obj_scale.x * 1.1, true, false );
+	return GLQuery.add_object( new Obj_from_geom( geom ), GLQuery.get_material_wireframe(), obj_position, obj_rotation, obj_scale.x * 1.1, true, false );
 }
 /** Add an object to the GLQuery.scene */
-GLQuery.fnc_add_object = function( geometry, material, obj_position, obj_rotation, int_scale, bool_auto_update, bool_static  )
+GLQuery.add_object = function( geometry, material, obj_position, obj_rotation, int_scale, bool_auto_update, bool_static  )
 {
 	
 	var mesh = new THREE.Mesh( geometry, material );
@@ -458,7 +406,16 @@ GLQuery.fnc_add_object = function( geometry, material, obj_position, obj_rotatio
 //	mesh.rotation.x = i * ( Math.PI / 180 ) + 1;
 //	mesh.rotation.y = i * ( Math.PI / 180 ) + 1;
 
-	mesh.scale.x = mesh.scale.y = mesh.scale.z = int_scale;
+	if ( typeof int_scale === 'object' )
+	{
+		mesh.scale.x = int_scale.x;
+		mesh.scale.y = int_scale.y;
+		mesh.scale.z = int_scale.z;
+	}
+	else
+	{
+		mesh.scale.x = mesh.scale.y = mesh.scale.z = int_scale;
+	}
 	mesh.updateMatrix();
 	//mesh.autoUpdateMatrix = Math.floor( Math.random() * 1.9 );
 
@@ -476,12 +433,12 @@ GLQuery.fnc_add_object = function( geometry, material, obj_position, obj_rotatio
 	//for ( k in GLQuery.arr_objects ) GLQuery.arr_objects[ k ].updateMatrix();
 	return mesh;
 }
-GLQuery.fnc_add_earth = function( str_name )
+GLQuery.add_earth = function( str_name )
 {
 	var geometry = new Sphere( 250, 32, 16 );
 	geometry.computeVertexNormals();
-	//GLQuery.material = GLQuery.fnc_load_texture('/textures/metal.jpg' );
-	var material = GLQuery.fnc_load_texture('/textures/land_ocean_ice_cloud_2048.jpg' );
+	//GLQuery.material = GLQuery.load_texture('textures/metal.jpg' );
+	var material = GLQuery.load_texture('textures/land_ocean_ice_cloud_2048.jpg' );
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.overdraw = true;
 	
@@ -501,11 +458,11 @@ GLQuery.fnc_add_earth = function( str_name )
 Add a metal ball where the target should be
 /**/
 
-GLQuery.fnc_add_pellet = function()
+GLQuery.add_pellet = function()
 {
 	var geometry = new Sphere( 30, 32, 16 );
 	geometry.computeVertexNormals();
-	var material = GLQuery.fnc_load_texture( '/textures/metal.jpg' );
+	var material = GLQuery.load_texture( 'textures/metal.jpg' );
 	var mesh = new THREE.Mesh( geometry, material );
 	mesh.overdraw = true;
 	mesh.updateMatrix();
@@ -513,7 +470,7 @@ GLQuery.fnc_add_pellet = function()
 	GLQuery.scene.addObject( mesh );
 	return mesh;
 }
-GLQuery.fnc_add_target = function()
+GLQuery.add_target = function()
 {
 	var ambientLight = new THREE.AmbientLight( 0x444444 );
 	GLQuery.scene.addLight( ambientLight );
@@ -530,7 +487,7 @@ GLQuery.fnc_add_target = function()
 	directionalLight.position.normalize();
 	GLQuery.scene.addLight( directionalLight );
 
-	GLQuery.mesh_cursor = GLQuery.fnc_add_pellet();
+	GLQuery.mesh_cursor = GLQuery.add_pellet();
 	GLQuery.arr_functions[ 'cursor' ] = function()
 	{
 		GLQuery.mesh_cursor.position = GLQuery.camera.target.position;
@@ -546,7 +503,7 @@ GLQuery.fnc_add_target = function()
 /**
 Event listeners
 /**/
-GLQuery.fnc_mouselook_horiz = function()
+GLQuery.mouselook_horiz = function()
 {
 	var int_abs = Math.abs( GLQuery.int_mouse_x );
 	if ( int_abs > GLQuery.int_width * 0.5 * 0.9 )
@@ -560,7 +517,7 @@ GLQuery.fnc_mouselook_horiz = function()
 	//GLQuery.int_mouse_x_old *= 0.0;
 	return ( diff );
 }
-GLQuery.fnc_mouselook_vert = function()
+GLQuery.mouselook_vert = function()
 {
 	var int_abs = Math.abs( GLQuery.int_mouse_y );
 	if ( int_abs > GLQuery.int_height * 0.5 * 0.4 )
@@ -571,7 +528,7 @@ GLQuery.fnc_mouselook_vert = function()
 	var diff = GLQuery.int_mouse_y - GLQuery.int_mouse_y_old;
 	return ( diff );
 }
-GLQuery.fnc_mouselook = function(event)
+GLQuery.mouselook = function(event)
 {
 	/** L.E.: it needs to calculate even when mouselook is disabled, or else it will jump on resume */
 	//if ( GLQuery.bool_mouselook === false ) return;
@@ -589,7 +546,7 @@ GLQuery.fnc_mouselook = function(event)
 }
 
 
-GLQuery.fnc_tween = function( vec3_from, vec3_to, time, type )
+GLQuery.tween = function( vec3_from, vec3_to, time, type )
 {
 	switch ( type )
 	{
@@ -643,58 +600,58 @@ GLQuery.vec3_z_south = new THREE.Vector3( 0, 0, 1 );
 GLQuery.vec3_y_up = new THREE.Vector3( 0, 1, 0 );
 GLQuery.vec3_x_east = new THREE.Vector3( 1, 0, 0 );
 
-GLQuery.fnc_camera_target_rotation = function( int_case, vec3, float_angle_z, float_angle_x )
+GLQuery.camera_target_rotation = function( int_case, vec3, float_angle_z, float_angle_x )
 {
 	if ( int_case === 0 )
 	if ( float_angle_x <= Math.PI / 2 )
 	{
-		THREE.Matrix4.rotationYMatrix ( -float_angle_z ).multiplyVector3( vec3 );
+		new THREE.Matrix4().setRotationY ( -float_angle_z ).multiplyVector3( vec3 );
 	}
 	else
 	{
-		THREE.Matrix4.rotationYMatrix ( float_angle_z ).multiplyVector3( vec3 );
+		new THREE.Matrix4().setRotationY ( float_angle_z ).multiplyVector3( vec3 );
 	}
 	if ( int_case === 1 )
 	if ( float_angle_x <= Math.PI / 2 )
 	{
-		THREE.Matrix4.rotationYMatrix ( float_angle_z ).multiplyVector3( vec3 );
+		new THREE.Matrix4().setRotationY ( float_angle_z ).multiplyVector3( vec3 );
 	}
 	else
 	{
-		THREE.Matrix4.rotationYMatrix ( -float_angle_z ).multiplyVector3( vec3 );
+		new THREE.Matrix4().setRotationY ( -float_angle_z ).multiplyVector3( vec3 );
 	}
 	return this;
 }
-GLQuery.fnc_camera_target_translation = function( int_case, vec3 )
+GLQuery.camera_target_translation = function( int_case, vec3 )
 {
 	if ( int_case === 0 )
-		THREE.Matrix4.translationMatrix ( -GLQuery.camera.position.x, -GLQuery.camera.position.y, -GLQuery.camera.position.z ).multiplyVector3( vec3 );
+		new THREE.Matrix4().setTranslation ( -GLQuery.camera.position.x, -GLQuery.camera.position.y, -GLQuery.camera.position.z ).multiplyVector3( vec3 );
 	if ( int_case === 1 )
-		THREE.Matrix4.translationMatrix ( GLQuery.camera.position.x, GLQuery.camera.position.y, GLQuery.camera.position.z ).multiplyVector3( vec3 );
+		new THREE.Matrix4().setTranslation ( GLQuery.camera.position.x, GLQuery.camera.position.y, GLQuery.camera.position.z ).multiplyVector3( vec3 );
 	return this;
 
 }
-GLQuery.fnc_camera_target_translate = function( int_case )
+GLQuery.camera_target_translate = function( int_case )
 {
 	if ( int_case === 0 )
-		GLQuery.camera.target.position = THREE.Matrix4.translationMatrix ( -GLQuery.camera.position.x, -GLQuery.camera.position.y, -GLQuery.camera.position.z ).multiplyVector3( GLQuery.camera.target.position );
+		GLQuery.camera.target.position = new THREE.Matrix4().setTranslation ( -GLQuery.camera.position.x, -GLQuery.camera.position.y, -GLQuery.camera.position.z ).multiplyVector3( GLQuery.camera.target.position );
 	if ( int_case === 1 )
-		GLQuery.camera.target.position = THREE.Matrix4.translationMatrix ( GLQuery.camera.position.x, GLQuery.camera.position.y, GLQuery.camera.position.z ).multiplyVector3( GLQuery.camera.target.position );
+		GLQuery.camera.target.position = new THREE.Matrix4().setTranslation ( GLQuery.camera.position.x, GLQuery.camera.position.y, GLQuery.camera.position.z ).multiplyVector3( GLQuery.camera.target.position );
 	return this;
 }
 
-GLQuery.fnc_camera_rotate_horiz = function( float_factor )
+GLQuery.camera_rotate_horiz = function( float_factor )
 {
 	/** Clone the old position */
 	vec3_target_position = GLQuery.camera.target.position.clone();
 	
 	/** Translate it as if the GLQuery.camera were in 0 0 0 */
-	GLQuery.fnc_camera_target_translation( 0, vec3_target_position );
+	GLQuery.camera_target_translation( 0, vec3_target_position );
 	
 	/** Rotate it around the Y vector (left to right) to give it an up/down movement */
-	THREE.Matrix4.rotationAxisAngleMatrix ( GLQuery.vec3_y_up, Math.PI * float_factor ).multiplyVector3( vec3_target_position );
+	new THREE.Matrix4().setRotationAxis ( GLQuery.vec3_y_up, Math.PI * float_factor ).multiplyVector3( vec3_target_position );
 	/** Rotate it back */
-	GLQuery.fnc_camera_target_translation( 1, vec3_target_position );
+	GLQuery.camera_target_translation( 1, vec3_target_position );
 	
 	/** Tween */
 	//fnc_tween( GLQuery.camera.target.position, vec3_target_position, 1000 );
@@ -703,19 +660,19 @@ GLQuery.fnc_camera_rotate_horiz = function( float_factor )
 	GLQuery.camera.target.position = vec3_target_position;
 	return this;
 }
-GLQuery.fnc_camera_target_angle_z = function( vec3 )
+GLQuery.camera_target_angle_z = function( vec3 )
 {
 	return Math.acos( vec3.clone().normalize().dot( GLQuery.vec3_z_south.clone().normalize() ) );
 }
-GLQuery.fnc_camera_target_angle_x = function( vec3 )
+GLQuery.camera_target_angle_x = function( vec3 )
 {
 	return Math.acos( vec3.clone().normalize().dot( GLQuery.vec3_x_east.clone().normalize() ) );
 }
-GLQuery.fnc_camera_target_angle_y = function( vec3 )
+GLQuery.camera_target_angle_y = function( vec3 )
 {
 	return Math.acos( vec3.clone().normalize().dot( GLQuery.vec3_y_up.clone().normalize() ) );
 }
-GLQuery.fnc_camera_rotate_vert_old = function( float_amount )
+GLQuery.camera_rotate_vert_old = function( float_amount )
 {
 	//http://forums.create.msdn.com/forums/p/7234/98796.aspx
 	//http://msdn.microsoft.com/en-us/library/bb196388.aspx
@@ -726,24 +683,24 @@ GLQuery.fnc_camera_rotate_vert_old = function( float_amount )
 	//float_length = vec3_target_position.clone().subSelf( GLQuery.camera.position ).length();
 
 	/** Translate it as if the GLQuery.camera were in 0 0 0 */
-	GLQuery.fnc_camera_target_translation( 0, vec3_target_position );
+	GLQuery.camera_target_translation( 0, vec3_target_position );
 
 
 	/** Angles with the axes */
-	var float_angle_z = Math.floor( GLQuery.fnc_camera_target_angle_z( vec3_target_position ) );
-	var float_angle_x = Math.floor( GLQuery.fnc_camera_target_angle_x( vec3_target_position ) );
-	//GLQuery.float_angle_y = GLQuery.fnc_camera_target_angle_y();
+	var float_angle_z = Math.floor( GLQuery.camera_target_angle_z( vec3_target_position ) );
+	var float_angle_x = Math.floor( GLQuery.camera_target_angle_x( vec3_target_position ) );
+	//GLQuery.float_angle_y = GLQuery.camera_target_angle_y();
 
 	/** Rotate it so that it points along the OX axis */
-	GLQuery.fnc_camera_target_rotation( 0, vec3_target_position, float_angle_z, float_angle_x );
+	GLQuery.camera_target_rotation( 0, vec3_target_position, float_angle_z, float_angle_x );
 	
 	/** Rotate with respect to the OX axis (up/down) */
-	THREE.Matrix4.rotationAxisAngleMatrix ( GLQuery.vec3_x_east, float_amount ).multiplyVector3( vec3_target_position );
+	new THREE.Matrix4().setRotationAxis ( GLQuery.vec3_x_east, float_amount ).multiplyVector3( vec3_target_position );
 	
 	/** Rotate it back to the original angle */
-	GLQuery.fnc_camera_target_rotation( 1, vec3_target_position, float_angle_z, float_angle_x );
+	GLQuery.camera_target_rotation( 1, vec3_target_position, float_angle_z, float_angle_x );
 	/** Translate it back in front of the GLQuery.camera */
-	GLQuery.fnc_camera_target_translation( 1, vec3_target_position );
+	GLQuery.camera_target_translation( 1, vec3_target_position );
 
 	/** Set the length */
 	
@@ -754,27 +711,27 @@ GLQuery.fnc_camera_rotate_vert_old = function( float_amount )
 	GLQuery.camera.target.position = vec3_target_position;
 	
 }
-GLQuery.fnc_camera_rotate_vert_newer = function( float_amount )
+GLQuery.camera_rotate_vert_newer = function( float_amount )
 {
 	var vec3_diff = GLQuery.camera.target.position.clone().subSelf( GLQuery.camera.position );
 
 	/** Translate it as if the GLQuery.camera were in 0 0 0 */
-	GLQuery.fnc_camera_target_translation( 0, vec3_diff );
+	GLQuery.camera_target_translation( 0, vec3_diff );
 
 	/** Angles with the axes */
-	var float_angle_z = GLQuery.fnc_camera_target_angle_z( vec3_diff );
-	var float_angle_x = GLQuery.fnc_camera_target_angle_x( vec3_diff );
+	var float_angle_z = GLQuery.camera_target_angle_z( vec3_diff );
+	var float_angle_x = GLQuery.camera_target_angle_x( vec3_diff );
 
 	/** Rotate it so that it points along the OX axis */
-	GLQuery.fnc_camera_target_rotation( 0, vec3_diff, float_angle_z, float_angle_x );
+	GLQuery.camera_target_rotation( 0, vec3_diff, float_angle_z, float_angle_x );
 	
 	/** Rotate with respect to the OX axis (up/down) */
-	THREE.Matrix4.rotationAxisAngleMatrix ( GLQuery.vec3_x_east, float_amount ).multiplyVector3( vec3_diff );
+	new THREE.Matrix4().setRotationAxis ( GLQuery.vec3_x_east, float_amount ).multiplyVector3( vec3_diff );
 	
 	/** Rotate it back to the original angle */
-	GLQuery.fnc_camera_target_rotation( 1, vec3_diff, float_angle_z, float_angle_x );
+	GLQuery.camera_target_rotation( 1, vec3_diff, float_angle_z, float_angle_x );
 	/** Translate it back in front of the GLQuery.camera */
-	GLQuery.fnc_camera_target_translation( 1, vec3_diff );
+	GLQuery.camera_target_translation( 1, vec3_diff );
 	
 	/** Tween */
 	GLQuery.camera.target.position = GLQuery.camera.position.clone().addSelf( vec3_diff );
@@ -782,14 +739,14 @@ GLQuery.fnc_camera_rotate_vert_newer = function( float_amount )
 	return this;
 	
 }
-GLQuery.fnc_camera_rotate_vert = function( float_amount )
+GLQuery.camera_rotate_vert = function( float_amount )
 {
 	var vec3_target = GLQuery.camera.target.position.clone();
 	/** Get the length */
 	//float_length = vec3_target_position.clone().subSelf( GLQuery.camera.position ).length();
 
 	/** Translate it as if the GLQuery.camera were in 0 0 0 */
-	GLQuery.fnc_camera_target_translation( 0, vec3_target );
+	GLQuery.camera_target_translation( 0, vec3_target );
 
 
 	var vec3_camera = { x : 0, y : 0, z : 0 }
@@ -800,8 +757,8 @@ GLQuery.fnc_camera_rotate_vert = function( float_amount )
 	
 	var vec3_normal = vec3_camera0.subSelf( vec3_camera ).crossSelf( vec3_target.subSelf( vec3_camera ) ).normalize();
 	
-	THREE.Matrix4.rotationAxisAngleMatrix ( vec3_normal, float_amount ).multiplyVector3( vec3_target );
-	GLQuery.fnc_camera_target_translation( 1, vec3_target );
+	new THREE.Matrix4().setRotationAxis ( vec3_normal, float_amount ).multiplyVector3( vec3_target );
+	GLQuery.camera_target_translation( 1, vec3_target );
 	
 	GLQuery.camera.target.position = vec3_target;
 	
@@ -809,7 +766,7 @@ GLQuery.fnc_camera_rotate_vert = function( float_amount )
 	
 }
 
-GLQuery.fnc_translate_z = function( vec3_from, vec3_to, amount )
+GLQuery.translate_z = function( vec3_from, vec3_to, amount )
 {
 	var vector = vec3_to.clone()
 		.subSelf( vec3_from )
@@ -820,18 +777,18 @@ GLQuery.fnc_translate_z = function( vec3_from, vec3_to, amount )
 	vec3_to.subSelf( vector );
 	return { from : vec3_from, to : vec3_to };
 }
-GLQuery.fnc_advance = function( vec3_from, vec3_to, float_amount )
+GLQuery.advance = function( vec3_from, vec3_to, float_amount )
 {
 	/** The destination */
-	var obj_res = GLQuery.fnc_translate_z( vec3_from.clone(), vec3_to.clone(), float_amount );
+	var obj_res = GLQuery.translate_z( vec3_from.clone(), vec3_to.clone(), float_amount );
 	/** Tweening */
-	GLQuery.fnc_tween( vec3_from, obj_res.from, 1000 );
-	GLQuery.fnc_tween( vec3_to, obj_res.to, 1000 );
+	GLQuery.tween( vec3_from, obj_res.from, 1000 );
+	GLQuery.tween( vec3_to, obj_res.to, 1000 );
 	//OLD: GLQuery.camera.translateZ(-float_moving_speed);
 	return this;
 }
 
-GLQuery.fnc_camera_translate_z = function( vec3_camera_position, vec3_target_position, amount )
+GLQuery.camera_translate_z = function( vec3_camera_position, vec3_target_position, amount )
 {
 	var vector = vec3_target_position.clone()
 		.subSelf( vec3_camera_position )
@@ -842,7 +799,7 @@ GLQuery.fnc_camera_translate_z = function( vec3_camera_position, vec3_target_pos
 	vec3_target_position.subSelf( vector );
 	return { camera_position : vec3_camera_position, target_position : vec3_target_position };
 }
-GLQuery.fnc_camera_translate_x = function( vec3_camera_position, vec3_target_position, amount )
+GLQuery.camera_translate_x = function( vec3_camera_position, vec3_target_position, amount )
 {
 	var vector = vec3_target_position.clone().subSelf( vec3_camera_position ).normalize().multiplyScalar( amount );
 	vector.cross( vector.clone(), GLQuery.vec3_y_up );
@@ -851,42 +808,42 @@ GLQuery.fnc_camera_translate_x = function( vec3_camera_position, vec3_target_pos
 	vec3_target_position.addSelf( vector );
 	return { camera_position : vec3_camera_position, target_position : vec3_target_position };
 }
-GLQuery.fnc_camera_advance = function( float_amount )
+GLQuery.camera_advance = function( float_amount )
 {
 	/** The destination */
-	var obj_res = GLQuery.fnc_camera_translate_z( GLQuery.camera.position.clone(), GLQuery.camera.target.position.clone(), float_amount );
+	var obj_res = GLQuery.camera_translate_z( GLQuery.camera.position.clone(), GLQuery.camera.target.position.clone(), float_amount );
 	/** Tweening */
-	GLQuery.fnc_tween( GLQuery.camera.position, obj_res.camera_position, 1000 );
-	GLQuery.fnc_tween( GLQuery.camera.target.position, obj_res.target_position, 1000 );
+	GLQuery.tween( GLQuery.camera.position, obj_res.camera_position, 1000 );
+	GLQuery.tween( GLQuery.camera.target.position, obj_res.target_position, 1000 );
 	//OLD: GLQuery.camera.translateZ(-float_moving_speed);
 	return this;
 }
-GLQuery.fnc_camera_sidestep = function( float_amount )
+GLQuery.camera_sidestep = function( float_amount )
 {
 	/** The destination */
-	var obj_res = GLQuery.fnc_camera_translate_x( GLQuery.camera.position.clone(), GLQuery.camera.target.position.clone(), float_amount );
+	var obj_res = GLQuery.camera_translate_x( GLQuery.camera.position.clone(), GLQuery.camera.target.position.clone(), float_amount );
 	/** Tweening */
-	GLQuery.fnc_tween( GLQuery.camera.position, obj_res.camera_position, 1000 );
-	GLQuery.fnc_tween( GLQuery.camera.target.position, obj_res.target_position, 1000 );
+	GLQuery.tween( GLQuery.camera.position, obj_res.camera_position, 1000 );
+	GLQuery.tween( GLQuery.camera.target.position, obj_res.target_position, 1000 );
 	//OLD:camera.translateX(-float_amount);
 	return this;
 }
-GLQuery.fnc_camera_sidestep = function( float_amount )
+GLQuery.camera_sidestep = function( float_amount )
 {
 	/** The destination */
-	var obj_res = GLQuery.fnc_camera_translate_x( GLQuery.camera.position.clone(), GLQuery.camera.target.position.clone(), float_amount );
+	var obj_res = GLQuery.camera_translate_x( GLQuery.camera.position.clone(), GLQuery.camera.target.position.clone(), float_amount );
 	/** Tweening */
-	GLQuery.fnc_tween( GLQuery.camera.position, obj_res.camera_position, GLQuery.int_moving_tween_duration );
-	GLQuery.fnc_tween( GLQuery.camera.target.position, obj_res.target_position, GLQuery.int_moving_tween_duration );
+	GLQuery.tween( GLQuery.camera.position, obj_res.camera_position, GLQuery.int_moving_tween_duration );
+	GLQuery.tween( GLQuery.camera.target.position, obj_res.target_position, GLQuery.int_moving_tween_duration );
 	//OLD:camera.translateX(float_amount);
 	return this;
 }
-GLQuery.fnc_camera_rise = function( float_amount )
+GLQuery.camera_rise = function( float_amount )
 {
-	var vec3_camera_position = THREE.Matrix4.translationMatrix ( 0, float_amount, 0 ).multiplyVector3( GLQuery.camera.position.clone() );
-	var vec3_target_position = THREE.Matrix4.translationMatrix ( 0, float_amount, 0 ).multiplyVector3( GLQuery.camera.target.position.clone() );
-	GLQuery.fnc_tween( GLQuery.camera.position, vec3_camera_position,GLQuery.int_moving_tween_duration );
-	GLQuery.fnc_tween( GLQuery.camera.target.position, vec3_target_position,GLQuery.int_moving_tween_duration );
+	var vec3_camera_position = new THREE.Matrix4().setTranslation ( 0, float_amount, 0 ).multiplyVector3( GLQuery.camera.position.clone() );
+	var vec3_target_position = new THREE.Matrix4().setTranslation ( 0, float_amount, 0 ).multiplyVector3( GLQuery.camera.target.position.clone() );
+	GLQuery.tween( GLQuery.camera.position, vec3_camera_position,GLQuery.int_moving_tween_duration );
+	GLQuery.tween( GLQuery.camera.target.position, vec3_target_position,GLQuery.int_moving_tween_duration );
 	return this;
 }
 
@@ -897,7 +854,7 @@ The main loop
 var halt = null;
 window.onfocus = function() { window.halt = false; };
 window.onblur = function() { window.halt = true; };
-GLQuery.fnc_main_loop = function()
+GLQuery.main_loop = function()
 {
 	if ( halt === true ) return;
 	
@@ -906,8 +863,8 @@ GLQuery.fnc_main_loop = function()
 	
 	if ( GLQuery.bool_mouselook === true && GLQuery.bool_mousemoved === true )
 	{
-		GLQuery.fnc_camera_rotate_horiz( -1 * GLQuery.fnc_mouselook_horiz() * 0.09 * 0.012 );
-		GLQuery.fnc_camera_rotate_vert( GLQuery.fnc_mouselook_vert() * 0.16 * 0.012 );
+		GLQuery.camera_rotate_horiz( -1 * GLQuery.mouselook_horiz() * 0.09 * 0.012 );
+		GLQuery.camera_rotate_vert( GLQuery.mouselook_vert() * 0.16 * 0.012 );
 	}
 	
 
@@ -943,26 +900,26 @@ GLQuery.fnc_main_loop = function()
 
 
 
-GLQuery.fnc_create_sky = function( width )
+GLQuery.create_sky = function( width )
 {
 	var factor = width / 2;
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/skybox/nz.jpg' ), {x:0, y:0, z:-factor*1}, {x:0,y:0,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/skybox/pz.jpg' ), {x:0, y:0, z:factor*1}, {x:0,y:Math.PI,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/skybox/px.jpg' ), {x:-factor*1, y:0, z:0}, {x:0,y:Math.PI/2,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/skybox/nx.jpg' ), {x:factor*1, y:0, z:0}, {x:0,y:-Math.PI/2,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/skybox/ny.jpg' ), {x:0, y:-factor*1, z:0}, {x:-Math.PI/2,y:0,z:Math.PI}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/skybox/py.jpg' ), {x:0, y:factor*1, z:0}, {x:Math.PI/2,y:0,z:Math.PI}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/skybox/nz.jpg' ), {x:0, y:0, z:-factor*1}, {x:0,y:0,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/skybox/pz.jpg' ), {x:0, y:0, z:factor*1}, {x:0,y:Math.PI,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/skybox/px.jpg' ), {x:-factor*1, y:0, z:0}, {x:0,y:Math.PI/2,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/skybox/nx.jpg' ), {x:factor*1, y:0, z:0}, {x:0,y:-Math.PI/2,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/skybox/ny.jpg' ), {x:0, y:-factor*1, z:0}, {x:-Math.PI/2,y:0,z:Math.PI}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/skybox/py.jpg' ), {x:0, y:factor*1, z:0}, {x:Math.PI/2,y:0,z:Math.PI}, 1, false, true );
 	return this;
 }
-GLQuery.fnc_create_sky2 = function( width )
+GLQuery.create_sky2 = function( width )
 {
 	var factor = width / 2;
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/pisa/nz.png' ), {x:0, y:0, z:-factor*1}, {x:0,y:0,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/pisa/pz.png' ), {x:0, y:0, z:factor*1}, {x:0,y:Math.PI,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/pisa/px.png' ), {x:-factor*1, y:0, z:0}, {x:0,y:Math.PI/2,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/pisa/nx.png' ), {x:factor*1, y:0, z:0}, {x:0,y:-Math.PI/2,z:0}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/pisa/ny.png' ), {x:0, y:-factor*1, z:0}, {x:-Math.PI/2,y:0,z:Math.PI}, 1, false, true );
-	GLQuery.fnc_add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.fnc_load_texture( '/textures/cube/pisa/py.png' ), {x:0, y:factor*1, z:0}, {x:Math.PI/2,y:0,z:Math.PI}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/pisa/nz.png' ), {x:0, y:0, z:-factor*1}, {x:0,y:0,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/pisa/pz.png' ), {x:0, y:0, z:factor*1}, {x:0,y:Math.PI,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/pisa/px.png' ), {x:-factor*1, y:0, z:0}, {x:0,y:Math.PI/2,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/pisa/nx.png' ), {x:factor*1, y:0, z:0}, {x:0,y:-Math.PI/2,z:0}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/pisa/ny.png' ), {x:0, y:-factor*1, z:0}, {x:-Math.PI/2,y:0,z:Math.PI}, 1, false, true );
+	GLQuery.add_object( g_plane = new Plane( factor*2, factor*2, 1, 1 ), GLQuery.load_texture( 'textures/cube/pisa/py.png' ), {x:0, y:factor*1, z:0}, {x:Math.PI/2,y:0,z:Math.PI}, 1, false, true );
 	return this;
 }
 

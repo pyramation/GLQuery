@@ -18,7 +18,7 @@ GLQuery.handleFileSelect = function( evt )
 		{
 	
 			
-			var mesh = GLQuery.fnc_add_object_from_str( ( e.target.result + '' ) );
+			var mesh = GLQuery.add_object_from_str( ( e.target.result + '' ) );
 			GLQuery.add( f.name + time(), mesh );
 			
 		} );
@@ -33,7 +33,7 @@ GLQuery.handleDragOver = function( evt )
 	evt.stopPropagation();
 	evt.preventDefault();
 }
-GLQuery.fnc_create_drop_point = function( elem )
+GLQuery.create_drop_point = function( elem )
 {
 	elem.addEventListener( 'dragover', GLQuery.handleDragOver, false );
 	elem.addEventListener( 'drop', GLQuery.handleFileSelect, false );
